@@ -1,0 +1,38 @@
+# ─── Secrets (Section 14: .env must never be committed) ──────
+.env
+.env.*
+!.env.example
+*.pem
+*-credentials.json
+gsc-credentials*.json
+
+# ─── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ─── Node / Next.js (frontend, Step 8) ───────────────────────
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+.vercel/
+
+# ─── Claude Code (local/personal only; shared = settings.json) ─
+.claude/settings.local.json
+
+# ─── Editor / OS ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

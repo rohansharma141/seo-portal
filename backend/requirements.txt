@@ -1,0 +1,37 @@
+# Prithvi SEO Portal — backend dependencies (Python 3.12)
+# Versions pinned per Section 2 of the build doc. Adjust patch versions only
+# if a pin fails to resolve on install.
+
+# ── Web framework ──────────────────────────────────────────────
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+
+# ── Config / validation ────────────────────────────────────────
+pydantic==2.10.4
+pydantic-settings==2.7.0
+email-validator==2.2.0
+
+# ── Database (async SQLAlchemy 2.x + asyncpg + Supabase) ───────
+SQLAlchemy==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+supabase==2.11.0
+
+# ── Scheduling ─────────────────────────────────────────────────
+APScheduler==3.11.0
+
+# ── Auth / security ────────────────────────────────────────────
+PyJWT==2.10.1
+bcrypt==4.2.1
+
+# ── External integrations (Section 6 — used in mock mode until keys set) ──
+httpx==0.28.1
+anthropic==0.42.0
+resend==2.6.0
+google-auth==2.37.0
+google-api-python-client==2.156.0
+
+# ── Testing (Step 3 onward) ────────────────────────────────────
+pytest==8.3.4
+pytest-asyncio==0.25.0
