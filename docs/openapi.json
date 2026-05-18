@@ -1,0 +1,2711 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Prithvi SEO Portal",
+    "description": "Standalone SEO auditing portal + REST API. See docs/SEO_PORTAL_BUILD_DOC.md for the full contract.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "description": "Liveness probe. No authentication required (Section 7.1).",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sites": {
+      "get": {
+        "tags": [
+          "sites"
+        ],
+        "summary": "List Sites",
+        "operationId": "list_sites_api_v1_sites_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteListOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "sites"
+        ],
+        "summary": "Create Site",
+        "operationId": "create_site_api_v1_sites_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}": {
+      "get": {
+        "tags": [
+          "sites"
+        ],
+        "summary": "Get Site",
+        "operationId": "get_site_api_v1_sites__site_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Site Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "sites"
+        ],
+        "summary": "Update Site",
+        "operationId": "update_site_api_v1_sites__site_id__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Site Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "sites"
+        ],
+        "summary": "Delete Site",
+        "description": "Soft delete \u2014 sets is_active=false (Section 7.2).",
+        "operationId": "delete_site_api_v1_sites__site_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Site Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audits": {
+      "get": {
+        "tags": [
+          "audits"
+        ],
+        "summary": "List Audits",
+        "operationId": "list_audits_api_v1_audits_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Site Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "audits"
+        ],
+        "summary": "Trigger Audit",
+        "operationId": "trigger_audit_api_v1_audits_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditCreatedOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audits/{audit_id}": {
+      "get": {
+        "tags": [
+          "audits"
+        ],
+        "summary": "Get Audit",
+        "operationId": "get_audit_api_v1_audits__audit_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Audit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audits/{audit_id}/issues": {
+      "get": {
+        "tags": [
+          "audits"
+        ],
+        "summary": "Get Audit Issues",
+        "operationId": "get_audit_issues_api_v1_audits__audit_id__issues_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Audit Id"
+            }
+          },
+          {
+            "name": "severity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Severity"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditIssuesOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audits/{audit_id}/status": {
+      "get": {
+        "tags": [
+          "audits"
+        ],
+        "summary": "Get Audit Status",
+        "operationId": "get_audit_status_api_v1_audits__audit_id__status_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Audit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditStatusOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/summary": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Summary",
+        "operationId": "summary_api_v1_reports_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/reports/compare": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Compare Sites",
+        "description": "Cross-site comparison (Addendum v1.1). `?site_ids=uuid1,uuid2,...`",
+        "operationId": "compare_sites_api_v1_reports_compare_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "site_ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Comma-separated list of 2-5 site UUIDs",
+              "title": "Site Ids"
+            },
+            "description": "Comma-separated list of 2-5 site UUIDs"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrossCompareOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/site/{site_id}/history": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Site History",
+        "operationId": "site_history_api_v1_reports_site__site_id__history_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Site Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteHistoryOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/site/{site_id}/compare": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Compare Audits",
+        "description": "Compare two audits side by side (`?a=<audit>&b=<audit>`).",
+        "operationId": "compare_audits_api_v1_reports_site__site_id__compare_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "site_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Site Id"
+            }
+          },
+          {
+            "name": "a",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "A"
+            }
+          },
+          {
+            "name": "b",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "B"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tokens": {
+      "get": {
+        "tags": [
+          "tokens"
+        ],
+        "summary": "List Tokens",
+        "operationId": "list_tokens_api_v1_tokens_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenListOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tokens"
+        ],
+        "summary": "Create Token",
+        "operationId": "create_token_api_v1_tokens_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenCreatedOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tokens/{token_id}": {
+      "delete": {
+        "tags": [
+          "tokens"
+        ],
+        "summary": "Revoke Token",
+        "operationId": "revoke_token_api_v1_tokens__token_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "token_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Token Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks": {
+      "get": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "List Webhooks",
+        "operationId": "list_webhooks_api_v1_webhooks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookListOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Create Webhook",
+        "operationId": "create_webhook_api_v1_webhooks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/webhooks/test": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Test Webhook",
+        "description": "Send a signed test payload to an arbitrary URL (Section 7.6).",
+        "operationId": "test_webhook_api_v1_webhooks_test_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookTestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookTestResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/webhooks/{webhook_id}": {
+      "delete": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Delete Webhook",
+        "operationId": "delete_webhook_api_v1_webhooks__webhook_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuditAnalysis": {
+        "properties": {
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "quick_wins": {
+            "items": {},
+            "type": "array",
+            "title": "Quick Wins"
+          },
+          "priority_actions": {
+            "items": {},
+            "type": "array",
+            "title": "Priority Actions"
+          },
+          "positive_signals": {
+            "items": {},
+            "type": "array",
+            "title": "Positive Signals"
+          }
+        },
+        "type": "object",
+        "title": "AuditAnalysis"
+      },
+      "AuditCreate": {
+        "properties": {
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "triggered_by": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "scheduled",
+              "api",
+              "deploy_hook"
+            ],
+            "title": "Triggered By",
+            "default": "manual"
+          }
+        },
+        "type": "object",
+        "required": [
+          "site_id"
+        ],
+        "title": "AuditCreate"
+      },
+      "AuditCreatedOut": {
+        "properties": {
+          "audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Audit Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "estimated_seconds": {
+            "type": "integer",
+            "title": "Estimated Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audit_id",
+          "status",
+          "site_id",
+          "message",
+          "estimated_seconds"
+        ],
+        "title": "AuditCreatedOut"
+      },
+      "AuditIssueOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "page_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Url"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "rule_id": {
+            "type": "string",
+            "title": "Rule Id"
+          },
+          "rule_name": {
+            "type": "string",
+            "title": "Rule Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "fix_suggestion": {
+            "type": "string",
+            "title": "Fix Suggestion"
+          },
+          "affected_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Affected Value"
+          },
+          "expected_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "severity",
+          "rule_id",
+          "rule_name",
+          "description",
+          "fix_suggestion"
+        ],
+        "title": "AuditIssueOut"
+      },
+      "AuditIssuesFilters": {
+        "properties": {
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Severity"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          }
+        },
+        "type": "object",
+        "title": "AuditIssuesFilters"
+      },
+      "AuditIssuesOut": {
+        "properties": {
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/AuditIssueOut"
+            },
+            "type": "array",
+            "title": "Issues"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AuditIssuesFilters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "issues",
+          "total",
+          "filters"
+        ],
+        "title": "AuditIssuesOut"
+      },
+      "AuditListItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "score_overall": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Overall"
+          },
+          "triggered_by": {
+            "type": "string",
+            "title": "Triggered By"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "site_id",
+          "status",
+          "triggered_by",
+          "created_at"
+        ],
+        "title": "AuditListItem"
+      },
+      "AuditListOut": {
+        "properties": {
+          "audits": {
+            "items": {
+              "$ref": "#/components/schemas/AuditListItem"
+            },
+            "type": "array",
+            "title": "Audits"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audits",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "AuditListOut"
+      },
+      "AuditOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "scores": {
+            "$ref": "#/components/schemas/AuditScores"
+          },
+          "pages_crawled": {
+            "type": "integer",
+            "title": "Pages Crawled",
+            "default": 0
+          },
+          "issues": {
+            "$ref": "#/components/schemas/IssueCounts"
+          },
+          "analysis": {
+            "$ref": "#/components/schemas/AuditAnalysis"
+          },
+          "gsc_snapshot": {
+            "type": "object",
+            "title": "Gsc Snapshot"
+          },
+          "backlinks": {
+            "type": "object",
+            "title": "Backlinks"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "site_id",
+          "status",
+          "scores",
+          "issues",
+          "analysis"
+        ],
+        "title": "AuditOut"
+      },
+      "AuditScores": {
+        "properties": {
+          "overall": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall"
+          },
+          "technical": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Technical"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "eeeat": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eeeat"
+          },
+          "performance": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performance"
+          },
+          "structure": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Structure"
+          }
+        },
+        "type": "object",
+        "title": "AuditScores"
+      },
+      "AuditStatusOut": {
+        "properties": {
+          "audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Audit Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "progress_message": {
+            "type": "string",
+            "title": "Progress Message"
+          },
+          "pages_crawled": {
+            "type": "integer",
+            "title": "Pages Crawled",
+            "default": 0
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audit_id",
+          "status",
+          "progress_message"
+        ],
+        "title": "AuditStatusOut"
+      },
+      "CompareOut": {
+        "properties": {
+          "site_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Id"
+          },
+          "a": {
+            "$ref": "#/components/schemas/CompareSide"
+          },
+          "b": {
+            "$ref": "#/components/schemas/CompareSide"
+          },
+          "score_delta": {
+            "type": "integer",
+            "title": "Score Delta"
+          }
+        },
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "score_delta"
+        ],
+        "title": "CompareOut"
+      },
+      "CompareSide": {
+        "properties": {
+          "audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Audit Id"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "scores": {
+            "type": "object",
+            "title": "Scores"
+          },
+          "issues_critical": {
+            "type": "integer",
+            "title": "Issues Critical",
+            "default": 0
+          },
+          "issues_warning": {
+            "type": "integer",
+            "title": "Issues Warning",
+            "default": 0
+          },
+          "issues_info": {
+            "type": "integer",
+            "title": "Issues Info",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "audit_id"
+        ],
+        "title": "CompareSide"
+      },
+      "CrossCompareOut": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "title": "Generated At"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/XCompareSite"
+            },
+            "type": "array",
+            "title": "Sites"
+          },
+          "leader": {
+            "$ref": "#/components/schemas/XCompareLeader"
+          },
+          "category_leaders": {
+            "type": "object",
+            "title": "Category Leaders"
+          },
+          "gaps": {
+            "items": {
+              "$ref": "#/components/schemas/XCompareGap"
+            },
+            "type": "array",
+            "title": "Gaps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "sites",
+          "leader",
+          "category_leaders",
+          "gaps"
+        ],
+        "title": "CrossCompareOut"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HistoryPoint": {
+        "properties": {
+          "audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Audit Id"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "critical": {
+            "type": "integer",
+            "title": "Critical",
+            "default": 0
+          },
+          "warning": {
+            "type": "integer",
+            "title": "Warning",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "audit_id"
+        ],
+        "title": "HistoryPoint"
+      },
+      "IssueCounts": {
+        "properties": {
+          "critical": {
+            "type": "integer",
+            "title": "Critical",
+            "default": 0
+          },
+          "warning": {
+            "type": "integer",
+            "title": "Warning",
+            "default": 0
+          },
+          "info": {
+            "type": "integer",
+            "title": "Info",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "IssueCounts"
+      },
+      "LastAuditSummary": {
+        "properties": {
+          "audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Audit Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "score_overall": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Overall"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audit_id",
+          "status"
+        ],
+        "title": "LastAuditSummary"
+      },
+      "SiteCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "domain": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Domain"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Url"
+          },
+          "site_type": {
+            "type": "string",
+            "enum": [
+              "brokerage",
+              "saas",
+              "broker_landing",
+              "other"
+            ],
+            "title": "Site Type",
+            "default": "other"
+          },
+          "schedule": {
+            "type": "string",
+            "enum": [
+              "weekly",
+              "monthly",
+              "manual"
+            ],
+            "title": "Schedule",
+            "default": "weekly"
+          },
+          "max_pages": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Max Pages",
+            "default": 100
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "domain",
+          "url"
+        ],
+        "title": "SiteCreate"
+      },
+      "SiteDetailOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "site_type": {
+            "type": "string",
+            "title": "Site Type"
+          },
+          "schedule": {
+            "type": "string",
+            "title": "Schedule"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "last_audit_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Audit At"
+          },
+          "last_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Score"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_audit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LastAuditSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "domain",
+          "url",
+          "site_type",
+          "schedule",
+          "is_active",
+          "created_at"
+        ],
+        "title": "SiteDetailOut"
+      },
+      "SiteHistoryOut": {
+        "properties": {
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "audits": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryPoint"
+            },
+            "type": "array",
+            "title": "Audits"
+          },
+          "trend": {
+            "type": "string",
+            "title": "Trend"
+          }
+        },
+        "type": "object",
+        "required": [
+          "site_id",
+          "site_name",
+          "audits",
+          "trend"
+        ],
+        "title": "SiteHistoryOut"
+      },
+      "SiteListOut": {
+        "properties": {
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/SiteOut"
+            },
+            "type": "array",
+            "title": "Sites"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sites",
+          "total"
+        ],
+        "title": "SiteListOut"
+      },
+      "SiteOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "site_type": {
+            "type": "string",
+            "title": "Site Type"
+          },
+          "schedule": {
+            "type": "string",
+            "title": "Schedule"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "last_audit_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Audit At"
+          },
+          "last_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Score"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "domain",
+          "url",
+          "site_type",
+          "schedule",
+          "is_active",
+          "created_at"
+        ],
+        "title": "SiteOut"
+      },
+      "SiteUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "site_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "brokerage",
+                  "saas",
+                  "broker_landing",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Site Type"
+          },
+          "schedule": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "weekly",
+                  "monthly",
+                  "manual"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schedule"
+          },
+          "max_pages": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Pages"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "SiteUpdate"
+      },
+      "SummaryOut": {
+        "properties": {
+          "sites_total": {
+            "type": "integer",
+            "title": "Sites Total"
+          },
+          "sites_healthy": {
+            "type": "integer",
+            "title": "Sites Healthy"
+          },
+          "sites_warning": {
+            "type": "integer",
+            "title": "Sites Warning"
+          },
+          "sites_critical": {
+            "type": "integer",
+            "title": "Sites Critical"
+          },
+          "avg_score_all_sites": {
+            "type": "integer",
+            "title": "Avg Score All Sites"
+          },
+          "total_critical_issues": {
+            "type": "integer",
+            "title": "Total Critical Issues"
+          },
+          "total_warning_issues": {
+            "type": "integer",
+            "title": "Total Warning Issues"
+          },
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/SummarySite"
+            },
+            "type": "array",
+            "title": "Sites"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sites_total",
+          "sites_healthy",
+          "sites_warning",
+          "sites_critical",
+          "avg_score_all_sites",
+          "total_critical_issues",
+          "total_warning_issues",
+          "sites"
+        ],
+        "title": "SummaryOut"
+      },
+      "SummarySite": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "last_audited": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Audited"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "SummarySite"
+      },
+      "TokenCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "TokenCreate"
+      },
+      "TokenCreatedOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "token_prefix": {
+            "type": "string",
+            "title": "Token Prefix"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "warning": {
+            "type": "string",
+            "title": "Warning",
+            "default": "Store this token securely. It will not be shown again."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "token",
+          "token_prefix",
+          "scopes"
+        ],
+        "title": "TokenCreatedOut"
+      },
+      "TokenListOut": {
+        "properties": {
+          "tokens": {
+            "items": {
+              "$ref": "#/components/schemas/TokenOut"
+            },
+            "type": "array",
+            "title": "Tokens"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tokens",
+          "total"
+        ],
+        "title": "TokenListOut"
+      },
+      "TokenOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "token_prefix": {
+            "type": "string",
+            "title": "Token Prefix"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "token_prefix",
+          "scopes",
+          "is_active",
+          "created_at"
+        ],
+        "title": "TokenOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WebhookCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Url"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "url"
+        ],
+        "title": "WebhookCreate"
+      },
+      "WebhookListOut": {
+        "properties": {
+          "webhooks": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookOut"
+            },
+            "type": "array",
+            "title": "Webhooks"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "webhooks",
+          "total"
+        ],
+        "title": "WebhookListOut"
+      },
+      "WebhookOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Events"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "last_triggered_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Triggered At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "url",
+          "events",
+          "is_active",
+          "created_at"
+        ],
+        "title": "WebhookOut"
+      },
+      "WebhookTestRequest": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Url"
+          },
+          "secret": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Secret"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "WebhookTestRequest"
+      },
+      "WebhookTestResult": {
+        "properties": {
+          "delivered": {
+            "type": "boolean",
+            "title": "Delivered"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "delivered",
+          "detail"
+        ],
+        "title": "WebhookTestResult"
+      },
+      "XCompareGap": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "leader_score": {
+            "type": "integer",
+            "title": "Leader Score"
+          },
+          "gap": {
+            "type": "integer",
+            "title": "Gap"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "site_id",
+          "site_name",
+          "score",
+          "leader_score",
+          "gap"
+        ],
+        "title": "XCompareGap"
+      },
+      "XCompareLeader": {
+        "properties": {
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "overall_score": {
+            "type": "integer",
+            "title": "Overall Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "site_id",
+          "site_name",
+          "overall_score"
+        ],
+        "title": "XCompareLeader"
+      },
+      "XCompareSite": {
+        "properties": {
+          "site_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Site Id"
+          },
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "site_type": {
+            "type": "string",
+            "title": "Site Type"
+          },
+          "audit_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Audit Id"
+          },
+          "audit_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audit Date"
+          },
+          "scores": {
+            "type": "object",
+            "title": "Scores"
+          },
+          "issues": {
+            "type": "object",
+            "title": "Issues"
+          },
+          "pages_crawled": {
+            "type": "integer",
+            "title": "Pages Crawled",
+            "default": 0
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          }
+        },
+        "type": "object",
+        "required": [
+          "site_id",
+          "site_name",
+          "domain",
+          "site_type",
+          "audit_id",
+          "scores",
+          "issues",
+          "rank"
+        ],
+        "title": "XCompareSite"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
