@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-canvas text-slate-900 antialiased;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Tabular figures for scores/metrics */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
