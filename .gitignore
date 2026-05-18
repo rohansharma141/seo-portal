@@ -6,6 +6,9 @@
 *-credentials.json
 gsc-credentials*.json
 
+# Transient commit-message file used by the tooling — never commit
+.gitmsg
+
 # ─── Python ──────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
