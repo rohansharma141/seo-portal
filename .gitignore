@@ -30,8 +30,9 @@ dist/
 *.tsbuildinfo
 .vercel/
 
-# ─── Claude Code (local/personal only; shared = settings.json) ─
+# ─── Claude Code (local/personal harness files — not shared) ──
 .claude/settings.local.json
+.claude/settings.json
 
 # ─── Editor / OS ─────────────────────────────────────────────
 .DS_Store
