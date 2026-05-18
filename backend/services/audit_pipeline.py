@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from typing import Protocol
 
 from services.analyser import analyse_audit
+from services.backlinks import get_backlink_data
 from services.crawler import crawl_site
 from services.gsc import get_gsc_performance
 from services.scorer import calculate_score, count_by_severity
@@ -37,6 +38,7 @@ class SiteInfo:
     id: uuid.UUID
     url: str
     max_pages: int
+    domain: str = ""  # Addendum v1.1 — needed for backlink lookup
 
 
 @dataclass
@@ -135,6 +137,8 @@ async def run_audit(
         counts = count_by_severity(issues)
         gsc = await get_gsc_performance(site.url)
         analysis = await analyse_audit(site.url, pages, issues, scores, gsc)
+        # Addendum v1.1 — backlink data (mock unless DataForSEO configured)
+        backlinks = await get_backlink_data(site.domain)
 
         await repo.add_issues(audit_id, issues)
         completed = _now()
@@ -154,6 +158,7 @@ async def run_audit(
             gsc_data=gsc,
             analysis_summary=analysis["summary"],
             quick_wins=analysis["quick_wins"],
+            audit_metadata={"backlinks": backlinks},
         )
         await repo.touch_site_last_audit(site.id, completed)
         score_overall = scores["overall"]

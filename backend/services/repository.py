@@ -168,7 +168,12 @@ class SqlAlchemyRepository:
         async with self._sm() as s:
             site = await s.get(Site, site_id)
             return (
-                SiteInfo(id=site.id, url=site.url, max_pages=site.max_pages)
+                SiteInfo(
+                    id=site.id,
+                    url=site.url,
+                    max_pages=site.max_pages,
+                    domain=site.domain,
+                )
                 if site
                 else None
             )
@@ -268,6 +273,8 @@ class SqlAlchemyRepository:
                 "positive_signals": [],
             },
             "gsc_snapshot": a.gsc_data or {},
+            # Addendum v1.1 — backlinks stored in audits.metadata
+            "backlinks": (a.audit_metadata or {}).get("backlinks", {}),
             "started_at": a.started_at,
             "completed_at": a.completed_at,
         }
@@ -362,6 +369,60 @@ class SqlAlchemyRepository:
                 for r in rows
             ]
             return issues, len(issues)
+
+    # ── cross-site compare (Addendum v1.1) ─────────────────────────────
+    @staticmethod
+    def _coerce_uuid(value):
+        try:
+            return value if isinstance(value, uuid.UUID) else uuid.UUID(str(value))
+        except (ValueError, AttributeError, TypeError):
+            return None
+
+    async def get_site_basic(self, site_id) -> dict | None:
+        from models import Site
+
+        sid = self._coerce_uuid(site_id)
+        if sid is None:
+            return None
+        async with self._sm() as s:
+            site = await s.get(Site, sid)
+            if site is None:
+                return None
+            return {
+                "id": site.id,
+                "name": site.name,
+                "domain": site.domain,
+                "site_type": site.site_type,
+            }
+
+    async def latest_complete_audit_summary(self, site_id) -> dict | None:
+        sid = self._coerce_uuid(site_id)
+        if sid is None:
+            return None
+        async with self._sm() as s:
+            a = await self._latest_complete_audit(s, sid)
+            if a is None:
+                return None
+            return {
+                "audit_id": a.id,
+                "audit_date": (
+                    a.completed_at.isoformat() if a.completed_at else None
+                ),
+                "scores": {
+                    "overall": a.score_overall,
+                    "technical": a.score_technical,
+                    "content": a.score_content,
+                    "eeeat": a.score_eeeat,
+                    "performance": a.score_performance,
+                    "structure": a.score_structure,
+                },
+                "issues": {
+                    "critical": a.issues_critical or 0,
+                    "warning": a.issues_warning or 0,
+                    "info": a.issues_info or 0,
+                },
+                "pages_crawled": a.pages_crawled or 0,
+            }
 
     # ── reports (Section 7.4) ──────────────────────────────────────────
     async def site_history(self, site_id: uuid.UUID) -> dict | None:

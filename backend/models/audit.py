@@ -83,6 +83,12 @@ class Audit(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Added for Addendum v1.1 (backlinks live in metadata["backlinks"]).
+    # DB column is `metadata`; Python attr renamed (reserved on declarative
+    # classes), same pattern as Site.site_metadata.
+    audit_metadata: Mapped[dict | None] = mapped_column(
+        "metadata", JSONB, nullable=True, server_default=text("'{}'::jsonb")
+    )
 
     site: Mapped["Site"] = relationship(back_populates="audits")
     issues: Mapped[list["AuditIssue"]] = relationship(

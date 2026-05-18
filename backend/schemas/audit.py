@@ -54,6 +54,7 @@ class AuditOut(BaseModel):
     issues: IssueCounts
     analysis: AuditAnalysis
     gsc_snapshot: dict = Field(default_factory=dict)
+    backlinks: dict = Field(default_factory=dict)  # Addendum v1.1
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
 

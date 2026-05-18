@@ -57,3 +57,41 @@ class SummaryOut(BaseModel):
     total_critical_issues: int
     total_warning_issues: int
     sites: list[SummarySite]
+
+
+# ── Addendum v1.1 — cross-site comparison ───────────────────────────────
+class XCompareSite(BaseModel):
+    site_id: UUID
+    site_name: str
+    domain: str
+    site_type: str
+    audit_id: UUID
+    audit_date: Optional[str] = None
+    scores: dict
+    issues: dict
+    pages_crawled: int = 0
+    rank: int
+
+
+class XCompareLeader(BaseModel):
+    site_id: UUID
+    site_name: str
+    overall_score: int
+
+
+class XCompareGap(BaseModel):
+    category: str
+    site_id: UUID
+    site_name: str
+    score: int
+    leader_score: int
+    gap: int
+    note: Optional[str] = None
+
+
+class CrossCompareOut(BaseModel):
+    generated_at: str
+    sites: list[XCompareSite]
+    leader: XCompareLeader
+    category_leaders: dict
+    gaps: list[XCompareGap]

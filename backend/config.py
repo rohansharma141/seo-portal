@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     upstash_redis_url: str = ""
     upstash_redis_token: str = ""
 
+    # ── Backlinks (DataForSEO) — Addendum v1.1, empty = mock ────────────
+    dataforseo_login: str = ""
+    dataforseo_password: str = ""
+
     # ── App config ──────────────────────────────────────────────────────
     environment: str = "development"
     app_url: str = "http://localhost:8000"
@@ -84,6 +88,10 @@ class Settings(BaseSettings):
     @property
     def rate_limit_redis_enabled(self) -> bool:
         return bool(self.upstash_redis_url and self.upstash_redis_token)
+
+    @property
+    def dataforseo_enabled(self) -> bool:
+        return bool(self.dataforseo_login and self.dataforseo_password)
 
 
 @lru_cache
