@@ -1,5 +1,5 @@
 const APP_NAME =
-  process.env.NEXT_PUBLIC_APP_NAME || "Prithvi SEO Portal";
+  process.env.NEXT_PUBLIC_APP_NAME || "Building10X SEO Portal";
 
 export function Header() {
   return (

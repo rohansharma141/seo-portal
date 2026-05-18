@@ -2,7 +2,7 @@
 # Paste this entire prompt at the start of every Claude Code session for this project.
 # ─────────────────────────────────────────────────────────────────────────────────
 
-You are building the **Prithvi SEO Portal** — a standalone web application and REST API for automated SEO auditing of websites. This is a real production project. Build complete, working code.
+You are building the **Building10X SEO Portal** — a standalone web application and REST API for automated SEO auditing of websites. This is a real production project. Build complete, working code.
 
 ## READ THESE DOCUMENTS FIRST (mandatory before writing any code)
 

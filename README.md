@@ -1,4 +1,4 @@
-# Prithvi SEO Portal
+# Building10X SEO Portal
 
 Standalone web portal + REST API for automated SEO auditing of websites.
 Built for Kedar Estate and PropOS, with a token-authenticated API so PropOS

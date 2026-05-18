@@ -1,4 +1,4 @@
-"""FastAPI application entry point — Prithvi SEO Portal.
+"""FastAPI application entry point — Building10X SEO Portal.
 
 Run locally with:  uvicorn main:app --reload   (from the backend/ directory)
 

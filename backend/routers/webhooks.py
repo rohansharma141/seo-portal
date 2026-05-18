@@ -65,7 +65,7 @@ async def test_webhook(payload: WebhookTestRequest):
     results = await deliver(
         [sub],
         "webhook.test",
-        {"message": "Test payload from Prithvi SEO Portal."},
+        {"message": "Test payload from Building10X SEO Portal."},
     )
     delivered = bool(results and results[0][1])
     return {

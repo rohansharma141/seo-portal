@@ -23,7 +23,7 @@ Build everything described. Where credentials are marked `[PLACEHOLDER]`, insert
 
 ## 1. PROJECT OVERVIEW
 
-**Product name:** Prithvi SEO Portal  
+**Product name:** Building10X SEO Portal  
 **Purpose:** Standalone web portal + REST API for automated SEO auditing of websites. Built for Kedar Estate and PropOS internal use, with API exposure for PropOS to call programmatically when auditing broker-generated landing pages.
 
 **Core capabilities:**
@@ -1259,7 +1259,7 @@ LOG_LEVEL=INFO
 
 # ─── FRONTEND (Next.js) ──────────────────────────────────────
 NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_APP_NAME=Prithvi SEO Portal
+NEXT_PUBLIC_APP_NAME=Building10X SEO Portal
 ```
 
 ---

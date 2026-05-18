@@ -1,4 +1,4 @@
-# Prithvi SEO Portal — API Usage
+# Building10X SEO Portal — API Usage
 
 Base URL (local): `http://localhost:8000`
 All endpoints are under `/api/v1/` except `GET /health`.

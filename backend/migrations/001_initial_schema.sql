@@ -1,4 +1,4 @@
--- Prithvi SEO Portal — initial schema (Section 4 of the build doc).
+-- Building10X SEO Portal — initial schema (Section 4 of the build doc).
 --
 -- Apply directly to Supabase: paste into the Supabase SQL editor, or run
 --   psql "$DATABASE_URL" -f backend/migrations/001_initial_schema.sql

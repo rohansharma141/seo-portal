@@ -64,7 +64,7 @@ async def deliver(
     for sub in subscriptions:
         headers = {
             "Content-Type": "application/json",
-            "User-Agent": "prithvi-seo-portal/1.0",
+            "User-Agent": "building10x-seo-portal/1.0",
         }
         if sub.secret:
             headers["X-SEO-Signature"] = "sha256=" + sign(sub.secret, body)

@@ -61,7 +61,7 @@ class Settings(BaseSettings):
     scheduler_enabled: bool = True
 
     # Fixed app metadata (not env-driven)
-    app_name: str = "Prithvi SEO Portal"
+    app_name: str = "Building10X SEO Portal"
     app_version: str = "1.0.0"
 
     @property

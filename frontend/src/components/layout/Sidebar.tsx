@@ -25,7 +25,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-60 shrink-0 flex-col bg-sidebar text-sidebar-fg">
       <div className="px-5 py-5">
         <div className="text-sm font-semibold tracking-tight text-white">
-          Prithvi
+          Building10X
         </div>
         <div className="text-xs text-slate-400">SEO Portal</div>
       </div>

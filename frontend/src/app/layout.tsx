@@ -8,7 +8,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Prithvi SEO Portal",
+  title: "Building10X SEO Portal",
   description:
     "Standalone SEO auditing portal for Kedar Estate and PropOS.",
 };

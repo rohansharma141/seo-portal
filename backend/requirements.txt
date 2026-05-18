@@ -1,4 +1,4 @@
-# Prithvi SEO Portal — backend dependencies (Python 3.12)
+# Building10X SEO Portal — backend dependencies (Python 3.12)
 # Versions pinned per Section 2 of the build doc. Adjust patch versions only
 # if a pin fails to resolve on install.
 
