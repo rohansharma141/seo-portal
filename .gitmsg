@@ -1,0 +1,26 @@
+Step 9: frontend pages (Section 8 + Addendum v1.1 UI)
+
+UI primitives: Button, Badge (Status/Severity), ScoreGauge (SVG arc),
+State (Spinner/Error/Empty/StateView/PageHeader), Modal/Field; useApi
+hook (loading/error/reload).
+
+Pages, each with loading/error/empty/populated states:
+- Dashboard: summary cards, sites table with gauge + Audit Now,
+  recent audits, needs-attention panel
+- Sites: search, add-site modal, view/delete actions
+- Site Detail: recharts score-trend line, category bars, audit
+  history, trigger audit + 3s status polling
+- Audit Report: overall gauge, summary stats, AI summary, quick-win
+  cards, score breakdown, issues panel with severity tabs +
+  expandable fixes, GSC panel, Addendum backlinks panel; polls
+  /status every 3s while running
+- API Tokens: table, create modal showing token once with copy,
+  revoke, API usage/docs
+- Settings: integration status cards incl. Addendum DataForSEO
+- Compare (Addendum): 2-5 site selector, recharts grouped bars,
+  category table with trophy leaders, gap cards, bookmarkable
+  ?site_ids copy-link
+
+npm run build passes: 8 routes, types valid, lint clean.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
