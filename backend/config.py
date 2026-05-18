@@ -52,6 +52,9 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
     api_token_prefix: str = "pse_"
     log_level: str = "INFO"
+    # Section 9 scheduler. Disabled in the test process (see tests/conftest.py)
+    # so the API test suite's lifespan doesn't start background cron jobs.
+    scheduler_enabled: bool = True
 
     # Fixed app metadata (not env-driven)
     app_name: str = "Prithvi SEO Portal"

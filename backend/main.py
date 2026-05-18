@@ -32,13 +32,17 @@ async def lifespan(app: FastAPI):
         settings.app_version,
         settings.environment,
     )
-    # TODO (Step 7, Section 9): wire the scheduler
-    #   from services.scheduler import setup_scheduler
-    #   setup_scheduler(app)
+    if settings.scheduler_enabled:
+        from services.scheduler import setup_scheduler
+
+        setup_scheduler(app)
+    else:
+        logger.info("Scheduler disabled (scheduler_enabled=False)")
     yield
-    # TODO (Step 7, Section 9): shut the scheduler down cleanly
-    #   from services.scheduler import scheduler
-    #   scheduler.shutdown(wait=False)
+    if settings.scheduler_enabled:
+        from services.scheduler import shutdown_scheduler
+
+        shutdown_scheduler()
     logger.info("Shutting down %s", settings.app_name)
 
 

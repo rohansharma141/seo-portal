@@ -145,6 +145,22 @@ class SqlAlchemyRepository:
             await s.commit()
             return True
 
+    async def list_due_sites(self, schedule: str) -> list:
+        """Active site ids whose schedule matches (Section 9 scheduler)."""
+        from models import Site
+
+        async with self._sm() as s:
+            return list(
+                (
+                    await s.execute(
+                        select(Site.id).where(
+                            Site.is_active.is_(True),
+                            Site.schedule == schedule,
+                        )
+                    )
+                ).scalars().all()
+            )
+
     # ── pipeline seam (AuditRepository protocol) ───────────────────────
     async def get_site(self, site_id) -> SiteInfo | None:
         from models import Site
