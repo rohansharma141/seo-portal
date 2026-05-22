@@ -112,9 +112,19 @@ DROP TABLE IF EXISTS sites CASCADE;
 """
 
 
+def _run_statements(sql: str) -> None:
+    """Execute each `;`-separated statement individually. The asyncpg driver
+    rejects multi-statement strings in a single execute, so the schema is
+    applied one statement at a time."""
+    for statement in sql.split(";"):
+        statement = statement.strip()
+        if statement:
+            op.execute(statement)
+
+
 def upgrade() -> None:
-    op.execute(SCHEMA_SQL)
+    _run_statements(SCHEMA_SQL)
 
 
 def downgrade() -> None:
-    op.execute(DROP_SQL)
+    _run_statements(DROP_SQL)
