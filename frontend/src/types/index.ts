@@ -112,6 +112,39 @@ export interface Backlinks {
   placeholder_note?: string | null;
 }
 
+// Addendum v1.2 — PageSpeed Insights
+export interface PsiOpportunity {
+  id: string;
+  title: string;
+  savings_ms: number;
+  description: string;
+}
+
+export interface PageSpeedResult {
+  url: string;
+  strategy: string;
+  data_source: "psi_api" | "mock";
+  performance_score: number;
+  lab: {
+    lcp_ms: number | null;
+    cls: number | null;
+    inp_ms: number | null;
+    fcp_ms: number | null;
+    tbt_ms: number | null;
+    speed_index_ms: number | null;
+  };
+  field: {
+    lcp_ms?: number | null;
+    cls?: number | null;
+    inp_ms?: number | null;
+    has_field_data: boolean;
+  };
+  opportunities: PsiOpportunity[];
+  error?: string | null;
+  note?: string;
+  fetched_at: string;
+}
+
 export interface Audit {
   id: string;
   site_id: string;
@@ -122,6 +155,7 @@ export interface Audit {
   analysis: AuditAnalysis;
   gsc_snapshot: Record<string, unknown>;
   backlinks: Backlinks;
+  pagespeed: PageSpeedResult[];
   started_at: string | null;
   completed_at: string | null;
 }

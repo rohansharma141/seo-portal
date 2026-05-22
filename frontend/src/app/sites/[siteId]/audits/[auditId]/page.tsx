@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { PerformancePanel } from "@/components/audits/PerformancePanel";
 import { SeverityBadge, StatusBadge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { ScoreGauge } from "@/components/ui/ScoreGauge";
@@ -241,6 +242,9 @@ export default function AuditReportPage() {
                       </tbody>
                     </table>
                   </Card>
+
+                  {/* Addendum v1.2 — PageSpeed performance panel */}
+                  <PerformancePanel pagespeed={audit.pagespeed ?? []} />
 
                   {/* Addendum v1.1 — Backlinks panel */}
                   <Card

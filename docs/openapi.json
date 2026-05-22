@@ -1371,6 +1371,11 @@
             "type": "object",
             "title": "Backlinks"
           },
+          "pagespeed": {
+            "items": {},
+            "type": "array",
+            "title": "Pagespeed"
+          },
           "started_at": {
             "anyOf": [
               {

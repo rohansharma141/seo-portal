@@ -103,7 +103,7 @@ Poll status, then fetch the full result:
 curl $BASE/api/v1/audits/$AUDIT_ID/status -H "Authorization: Bearer $TOKEN"
 
 curl $BASE/api/v1/audits/$AUDIT_ID -H "Authorization: Bearer $TOKEN"
-# scores, issues counts, analysis, gsc_snapshot, backlinks (Addendum v1.1)
+# scores, issues, analysis, gsc_snapshot, backlinks (v1.1), pagespeed (v1.2)
 ```
 
 List (filterable / paginated) and issues (filterable):

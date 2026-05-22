@@ -55,6 +55,7 @@ class AuditOut(BaseModel):
     analysis: AuditAnalysis
     gsc_snapshot: dict = Field(default_factory=dict)
     backlinks: dict = Field(default_factory=dict)  # Addendum v1.1
+    pagespeed: list = Field(default_factory=list)  # Addendum v1.2
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
 

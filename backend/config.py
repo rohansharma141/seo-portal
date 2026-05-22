@@ -60,6 +60,13 @@ class Settings(BaseSettings):
     # so the API test suite's lifespan doesn't start background cron jobs.
     scheduler_enabled: bool = True
 
+    # PageSpeed Insights (Addendum v1.2) — FREE API, live-capable. PSI calls
+    # are slow (10-30s); psi_enabled is turned off in the test process
+    # (conftest) so audits don't make network calls during pytest.
+    psi_api_key: str = ""
+    psi_max_urls: int = 5
+    psi_enabled: bool = True
+
     # Fixed app metadata (not env-driven)
     app_name: str = "Building10X SEO Portal"
     app_version: str = "1.0.0"

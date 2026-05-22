@@ -17,10 +17,17 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Protocol
 
+from config import settings
 from services.analyser import analyse_audit
 from services.backlinks import get_backlink_data
 from services.crawler import crawl_site
 from services.gsc import get_gsc_performance
+from services.pagespeed import (
+    apply_psi_to_pages,
+    get_pagespeed_batch,
+    psi_opportunity_issues,
+    select_psi_urls,
+)
 from services.scorer import calculate_score, count_by_severity
 from services.webhook_dispatcher import Sender, deliver
 from utils.seo_rules import evaluate_pages
@@ -130,7 +137,19 @@ async def run_audit(
             pages_crawled=len(pages),
             crawl_data=pages,
         )
+
+        # Addendum v1.2 — real Core Web Vitals from PageSpeed Insights.
+        # Concurrent + capped at PSI_MAX_URLS; psi_enabled is off in tests.
+        psi_results: list[dict] = []
+        if settings.psi_enabled:
+            psi_results = await get_pagespeed_batch(
+                select_psi_urls(pages, settings.psi_max_urls), "mobile"
+            )
+            apply_psi_to_pages(pages, psi_results)
+
         issues = evaluate_pages(pages)
+        for psi in psi_results:
+            issues.extend(psi_opportunity_issues(psi))
 
         await repo.update_audit(audit_id, status="scoring")
         scores = calculate_score(issues)
@@ -158,7 +177,10 @@ async def run_audit(
             gsc_data=gsc,
             analysis_summary=analysis["summary"],
             quick_wins=analysis["quick_wins"],
-            audit_metadata={"backlinks": backlinks},
+            audit_metadata={
+                "backlinks": backlinks,
+                "pagespeed": psi_results,  # Addendum v1.2
+            },
         )
         await repo.touch_site_last_audit(site.id, completed)
         score_overall = scores["overall"]

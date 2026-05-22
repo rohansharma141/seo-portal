@@ -44,6 +44,14 @@ const INTEGRATIONS: Integration[] = [
     note: "~₹0.12 per domain lookup · dataforseo.com",
     docs: "https://dataforseo.com",
   },
+  {
+    // Addendum v1.2
+    name: "PageSpeed Insights",
+    desc: "Real Core Web Vitals for the Performance score",
+    envVars: "PSI_API_KEY (optional), PSI_MAX_URLS",
+    note: "FREE — works without a key at low rate limits; a free key raises it to 25k/day.",
+    docs: "https://developers.google.com/speed/docs/insights/v5/get-started",
+  },
 ];
 
 export default function SettingsPage() {

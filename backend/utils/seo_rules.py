@@ -255,6 +255,16 @@ RULE_PERFORMANCE = [
         "fix": "Set explicit width and height on all images and embeds. Avoid inserting content above existing content.",
     },
     {
+        # Addendum v1.2 — fed real INP from PageSpeed Insights lab data.
+        "id": "inp_poor",
+        "name": "Poor INP (Interaction to Next Paint)",
+        "severity": "warning",
+        "category": "performance",
+        "check": lambda page: page.get("inp_ms", 0) > 200,
+        "description": "INP is over 200ms. Interactions feel sluggish; Google's threshold for 'good' is 200ms.",
+        "fix": "Reduce JavaScript execution time, break up long tasks, and defer non-critical third-party scripts.",
+    },
+    {
         "id": "images_not_webp",
         "name": "Images Not Using WebP Format",
         "severity": "info",

@@ -275,6 +275,8 @@ class SqlAlchemyRepository:
             "gsc_snapshot": a.gsc_data or {},
             # Addendum v1.1 — backlinks stored in audits.metadata
             "backlinks": (a.audit_metadata or {}).get("backlinks", {}),
+            # Addendum v1.2 — PageSpeed Insights results (per URL)
+            "pagespeed": (a.audit_metadata or {}).get("pagespeed", []),
             "started_at": a.started_at,
             "completed_at": a.completed_at,
         }
