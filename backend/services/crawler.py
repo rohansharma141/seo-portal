@@ -1,47 +1,239 @@
-"""Firecrawl integration [PLACEHOLDER] — Section 6.1.
+"""Firecrawl integration — Section 6.1.
 
-When ``FIRECRAWL_API_KEY`` is unset the portal returns realistic mock page
-data shaped identically to parsed Firecrawl output (PAGE_DATA_SCHEMA), so
-swapping in the real key later only changes the env var, not the callers.
+Real crawl when ``FIRECRAWL_API_KEY`` is set: start a Firecrawl /crawl job,
+poll to completion, and parse each page's HTML into the PAGE_DATA_SCHEMA the
+SEO rules consume. With no key, returns realistic mock data of the same shape.
+
+NOTE: the real path has not been exercised against the live Firecrawl API
+during the build — validate the field mapping when the key is first set.
 """
 
+import asyncio
+import json
 import logging
+import re
+from urllib.parse import urljoin, urlparse
 
 from config import settings
 
 logger = logging.getLogger("seo_portal.crawler")
 
 FIRECRAWL_BASE_URL = "https://api.firecrawl.dev/v1"
+_POLL_INTERVAL_S = 4
+_MAX_POLLS = 90  # ~6 minutes
 
 
 async def crawl_site(url: str, max_pages: int = 100) -> list[dict]:
-    """Crawl a website; return a list of page-data dicts (PAGE_DATA_SCHEMA).
+    """Crawl a website; return page-data dicts (PAGE_DATA_SCHEMA).
 
-    Real implementation: POST to Firecrawl /crawl with the site URL and
-    max_pages limit, poll /crawl/{job_id} until complete, parse the
-    markdown/html output into structured page data.
+    Real Firecrawl when FIRECRAWL_API_KEY is set, else realistic mock data.
     """
     if not settings.firecrawl_enabled:
-        # [PLACEHOLDER] no API key configured → realistic mock data
         logger.info("FIRECRAWL_API_KEY unset — returning mock crawl for %s", url)
         return _mock_crawl_result(url, max_pages)
+    logger.info("Crawling %s via Firecrawl (limit=%s)", url, max_pages)
+    return await _firecrawl_crawl(url, max_pages)
 
-    # TODO: implement real Firecrawl crawl when FIRECRAWL_API_KEY is set
-    # import httpx
-    # async with httpx.AsyncClient(timeout=60) as client:
-    #     response = await client.post(
-    #         f"{FIRECRAWL_BASE_URL}/crawl",
-    #         headers={"Authorization": f"Bearer {settings.firecrawl_api_key}"},
-    #         json={"url": url, "limit": max_pages,
-    #               "scrapeOptions": {"formats": ["markdown", "html"]}},
-    #     )
-    #     job_id = response.json()["id"]
-    #     # poll f"{FIRECRAWL_BASE_URL}/crawl/{job_id}" until status == "completed"
-    #     # then parse each page into PAGE_DATA_SCHEMA shape and return
-    raise NotImplementedError(
-        "[PLACEHOLDER] Real Firecrawl crawling is not implemented yet. "
-        "Unset FIRECRAWL_API_KEY to use mock data."
+
+async def _firecrawl_crawl(url: str, max_pages: int) -> list[dict]:
+    """Real Firecrawl crawl — start a job, poll to completion, parse pages.
+    Raises on failure so the audit is recorded as failed (never silently
+    mocked when the operator has configured a real key)."""
+    import httpx
+
+    headers = {"Authorization": f"Bearer {settings.firecrawl_api_key}"}
+    async with httpx.AsyncClient(timeout=60) as client:
+        start = await client.post(
+            f"{FIRECRAWL_BASE_URL}/crawl",
+            headers=headers,
+            json={
+                "url": url,
+                "limit": max_pages,
+                "scrapeOptions": {"formats": ["html", "markdown"]},
+            },
+        )
+        start.raise_for_status()
+        job_id = start.json().get("id")
+        if not job_id:
+            raise RuntimeError("Firecrawl did not return a crawl job id")
+
+        for _ in range(_MAX_POLLS):
+            await asyncio.sleep(_POLL_INTERVAL_S)
+            poll = await client.get(
+                f"{FIRECRAWL_BASE_URL}/crawl/{job_id}", headers=headers
+            )
+            poll.raise_for_status()
+            body = poll.json()
+            status = body.get("status")
+            if status == "completed":
+                items = await _collect_all(client, body, headers)
+                pages = [_parse_firecrawl_page(it, url) for it in items]
+                _flag_duplicates(pages)
+                logger.info(
+                    "Firecrawl crawl of %s done — %d pages", url, len(pages)
+                )
+                return pages
+            if status == "failed":
+                raise RuntimeError(f"Firecrawl crawl failed for {url}")
+    raise RuntimeError(f"Firecrawl crawl timed out for {url}")
+
+
+async def _collect_all(client, body: dict, headers: dict) -> list[dict]:
+    """Gather all page items, following Firecrawl's `next` pagination."""
+    items = list(body.get("data") or [])
+    nxt = body.get("next")
+    while nxt:
+        resp = await client.get(nxt, headers=headers)
+        resp.raise_for_status()
+        page = resp.json()
+        items.extend(page.get("data") or [])
+        nxt = page.get("next")
+    return items
+
+
+def _meta(soup, name: str) -> str | None:
+    tag = soup.find("meta", attrs={"name": name})
+    return tag.get("content") if tag and tag.get("content") else None
+
+
+def _meta_prop(soup, prop: str) -> str | None:
+    tag = soup.find("meta", attrs={"property": prop})
+    return tag.get("content") if tag and tag.get("content") else None
+
+
+def _heading_broken(soup) -> bool:
+    """True if heading levels skip a level (e.g. H1 → H3 with no H2)."""
+    prev = 0
+    for h in soup.find_all(re.compile(r"^h[1-6]$")):
+        lvl = int(h.name[1])
+        if prev and lvl > prev + 1:
+            return True
+        prev = lvl
+    return False
+
+
+def _parse_firecrawl_page(item: dict, site_url: str) -> dict:
+    """Parse one Firecrawl page result into the PAGE_DATA_SCHEMA shape."""
+    from bs4 import BeautifulSoup
+
+    meta = item.get("metadata") or {}
+    html = item.get("html") or ""
+    markdown = item.get("markdown") or ""
+    page_url = (
+        meta.get("sourceURL")
+        or meta.get("url")
+        or item.get("url")
+        or site_url
     )
+    soup = BeautifulSoup(html, "html.parser")
+
+    title = meta.get("title")
+    if not title and soup.title and soup.title.string:
+        title = soup.title.string.strip()
+    description = meta.get("description") or _meta(soup, "description")
+
+    def headings(level: str) -> list[str]:
+        return [h.get_text(strip=True) for h in soup.find_all(level)]
+
+    images = [
+        {
+            "src": img.get("src", ""),
+            "alt": img.get("alt"),
+            "width": img.get("width"),
+            "height": img.get("height"),
+        }
+        for img in soup.find_all("img")
+    ]
+
+    host = urlparse(page_url).netloc
+    internal_links: list[str] = []
+    external_links: list[str] = []
+    for a in soup.find_all("a", href=True):
+        href = urljoin(page_url, a["href"])
+        netloc = urlparse(href).netloc
+        (internal_links if not netloc or netloc == host else external_links).append(href)
+
+    canon = soup.find("link", attrs={"rel": "canonical"})
+    canonical = (canon.get("href") if canon else None) or meta.get("canonical")
+    robots = (_meta(soup, "robots") or "").lower()
+
+    structured_data = None
+    jsonld = soup.find("script", attrs={"type": "application/ld+json"})
+    if jsonld and jsonld.string:
+        try:
+            structured_data = json.loads(jsonld.string)
+        except (ValueError, TypeError):
+            structured_data = {"_unparsed": True}
+
+    text = soup.get_text(" ", strip=True) or markdown
+    time_tag = soup.find("time")
+    publish_date = _meta_prop(soup, "article:published_time") or (
+        time_tag.get("datetime") if time_tag else None
+    )
+
+    path = urlparse(page_url).path.strip("/")
+    is_homepage = path == ""
+    if is_homepage:
+        page_type = "homepage"
+    elif path.startswith("blog"):
+        page_type = "blog"
+    elif path.startswith(("project", "propert")):
+        page_type = "project"
+    else:
+        page_type = "other"
+
+    return {
+        "url": page_url,
+        "title": title,
+        "meta_description": description,
+        "h1": headings("h1"),
+        "h2": headings("h2"),
+        "h3": headings("h3"),
+        "word_count": len(text.split()),
+        "images": images,
+        "internal_links": internal_links,
+        "external_links": external_links,
+        "broken_links": [],  # Firecrawl does not report these
+        "canonical": canonical,
+        "noindex": "noindex" in robots,
+        "structured_data": structured_data,
+        "has_author_byline": bool(
+            soup.find(attrs={"rel": "author"})
+            or soup.find(class_=re.compile(r"author|byline", re.I))
+            or _meta_prop(soup, "article:author")
+        ),
+        "has_contact_info": bool(
+            soup.find("a", href=re.compile(r"^(tel:|mailto:)", re.I))
+        ),
+        "publish_date": publish_date,
+        "is_homepage": is_homepage,
+        "page_type": page_type,
+        "lcp_ms": None,  # filled by PageSpeed Insights (Addendum v1.2)
+        "cls_score": None,
+        "heading_hierarchy_broken": _heading_broken(soup),
+        "title_duplicate": False,  # set by _flag_duplicates
+        "meta_duplicate": False,
+    }
+
+
+def _flag_duplicates(pages: list[dict]) -> None:
+    """Mark title_duplicate / meta_duplicate across the crawled page set."""
+
+    def tally(key: str) -> dict:
+        seen: dict[str, int] = {}
+        for p in pages:
+            v = (p.get(key) or "").strip()
+            if v:
+                seen[v] = seen.get(v, 0) + 1
+        return seen
+
+    titles = tally("title")
+    metas = tally("meta_description")
+    for p in pages:
+        t = (p.get("title") or "").strip()
+        m = (p.get("meta_description") or "").strip()
+        p["title_duplicate"] = bool(t and titles.get(t, 0) > 1)
+        p["meta_duplicate"] = bool(m and metas.get(m, 0) > 1)
 
 
 def _mock_crawl_result(url: str, max_pages: int) -> list[dict]:

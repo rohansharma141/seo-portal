@@ -102,7 +102,8 @@ async def test_analyser_mock_shape():
 @pytest.mark.parametrize(
     "attr,call",
     [
-        ("firecrawl_api_key", lambda: crawl_site(SITE)),
+        # Firecrawl is now a real implementation (see test_crawler_parsing);
+        # GSC and Claude analysis remain placeholders.
         ("gsc_credentials_path", lambda: get_gsc_performance(SITE)),
         ("anthropic_api_key", lambda: analyse_audit(SITE, [], [], {}, {})),
     ],
@@ -113,3 +114,53 @@ async def test_real_path_is_a_placeholder_when_configured(monkeypatch, attr, cal
     monkeypatch.setattr(settings, attr, "configured-value")
     with pytest.raises(NotImplementedError, match=r"\[PLACEHOLDER\]"):
         await call()
+
+
+# ── Firecrawl real-path HTML parsing (Section 6.1) ──────────────────────
+def test_crawler_parsing():
+    from services.crawler import _flag_duplicates, _parse_firecrawl_page
+
+    item = {
+        "metadata": {
+            "sourceURL": "https://kedar.estate/projects/godrej-samaris",
+            "title": "Godrej Samaris Sector 53 | Kedar Estate",
+            "description": "A first-hand review of Godrej Samaris.",
+        },
+        "html": """
+            <html><head>
+              <meta name="robots" content="index,follow">
+              <link rel="canonical" href="https://kedar.estate/projects/godrej-samaris">
+              <script type="application/ld+json">{"@type":"Product"}</script>
+            </head><body>
+              <h1>Godrej Samaris</h1><h2>Overview</h2><h3>Quality</h3>
+              <img src="/a.webp" alt="tower" width="800" height="600">
+              <a href="/projects">Projects</a>
+              <a href="https://rera.gov.in">RERA</a>
+              <a href="tel:+919999999999">Call</a>
+              <p>Some genuine body content about the project here.</p>
+            </body></html>
+        """,
+        "markdown": "Some genuine body content about the project here.",
+    }
+    page = _parse_firecrawl_page(item, "https://kedar.estate")
+    assert page["title"] == "Godrej Samaris Sector 53 | Kedar Estate"
+    assert page["h1"] == ["Godrej Samaris"]
+    assert page["page_type"] == "project"
+    assert page["canonical"].endswith("/projects/godrej-samaris")
+    assert page["noindex"] is False
+    assert page["structured_data"] == {"@type": "Product"}
+    assert page["has_contact_info"] is True
+    assert len(page["images"]) == 1 and page["images"][0]["alt"] == "tower"
+    assert page["internal_links"] and page["external_links"]
+    assert page["word_count"] > 0
+
+    # duplicate detection across the crawled set
+    pages = [
+        {"title": "Same", "meta_description": "d"},
+        {"title": "Same", "meta_description": "e"},
+        {"title": "Unique", "meta_description": "d"},
+    ]
+    _flag_duplicates(pages)
+    assert pages[0]["title_duplicate"] is True
+    assert pages[2]["title_duplicate"] is False
+    assert pages[0]["meta_duplicate"] is True and pages[1]["meta_duplicate"] is False

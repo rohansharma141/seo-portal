@@ -10,7 +10,7 @@ import { EmptyState, PageHeader, StateView } from "@/components/ui/State";
 import { api, ApiError } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 import { formatDate } from "@/lib/utils";
-import type { SiteCreate, SiteListResponse } from "@/types";
+import type { Site, SiteCreate, SiteListResponse } from "@/types";
 
 const EMPTY: SiteCreate = {
   name: "",
@@ -21,13 +21,19 @@ const EMPTY: SiteCreate = {
   max_pages: 100,
 };
 
+type Mode = "create" | "edit";
+
 export default function SitesPage() {
   const state = useApi<SiteListResponse>(() => api.sites.list(), []);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<Mode>("create");
+  const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<SiteCreate>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [busyAudit, setBusyAudit] = useState<string | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const sites = state.data?.sites ?? [];
@@ -40,17 +46,51 @@ export default function SitesPage() {
     );
   }, [state.data, query]);
 
+  function openCreate() {
+    setMode("create");
+    setEditId(null);
+    setForm(EMPTY);
+    setFormError(null);
+    setOpen(true);
+  }
+
+  function openEdit(s: Site) {
+    setMode("edit");
+    setEditId(s.id);
+    setForm({
+      name: s.name,
+      domain: s.domain,
+      url: s.url,
+      site_type: s.site_type as SiteCreate["site_type"],
+      schedule: s.schedule as SiteCreate["schedule"],
+      max_pages: 100,
+    });
+    setFormError(null);
+    setOpen(true);
+  }
+
   async function submit() {
     setSaving(true);
     setFormError(null);
     try {
-      await api.sites.create(form);
+      if (mode === "create") {
+        await api.sites.create(form);
+      } else if (editId) {
+        // domain is immutable — send only the editable fields
+        await api.sites.update(editId, {
+          name: form.name,
+          url: form.url,
+          site_type: form.site_type,
+          schedule: form.schedule,
+          max_pages: form.max_pages,
+        });
+      }
       setOpen(false);
       setForm(EMPTY);
       await state.reload();
     } catch (e) {
       setFormError(
-        e instanceof ApiError ? e.detail : "Failed to create site",
+        e instanceof ApiError ? e.detail : "Failed to save site",
       );
     } finally {
       setSaving(false);
@@ -63,14 +103,36 @@ export default function SitesPage() {
     await state.reload();
   }
 
+  async function runAudit(id: string, name: string) {
+    setBusyAudit(id);
+    setFlash(null);
+    try {
+      await api.audits.trigger(id, "manual");
+      setFlash(`Audit queued for "${name}" — open the site to watch progress.`);
+      await state.reload();
+    } catch (e) {
+      setFlash(
+        e instanceof ApiError
+          ? `Could not start audit: ${e.detail}`
+          : "Could not start audit.",
+      );
+    } finally {
+      setBusyAudit(null);
+    }
+  }
+
   return (
     <div>
       <PageHeader
         title="Sites"
-        action={
-          <Button onClick={() => setOpen(true)}>+ Add New Site</Button>
-        }
+        action={<Button onClick={openCreate}>+ Add New Site</Button>}
       />
+
+      {flash && (
+        <Card className="mb-4 border-brand/30 bg-brand-fg">
+          <p className="text-sm text-slate-700">{flash}</p>
+        </Card>
+      )}
 
       <input
         className={`${inputClass} mb-4 max-w-sm`}
@@ -86,9 +148,7 @@ export default function SitesPage() {
           <EmptyState
             title="No sites registered"
             hint="Add a website to start auditing it."
-            action={
-              <Button onClick={() => setOpen(true)}>+ Add New Site</Button>
-            }
+            action={<Button onClick={openCreate}>+ Add New Site</Button>}
           />
         }
       >
@@ -128,19 +188,34 @@ export default function SitesPage() {
                     <td className="py-3 text-slate-600">
                       {formatDate(s.last_audit_at)}
                     </td>
-                    <td className="py-3 text-right">
-                      <Link
-                        href={`/sites/${s.id}`}
-                        className="mr-3 text-brand hover:underline"
-                      >
-                        View
-                      </Link>
-                      <button
-                        onClick={() => remove(s.id, s.name)}
-                        className="text-critical hover:underline"
-                      >
-                        Delete
-                      </button>
+                    <td className="py-3">
+                      <div className="flex justify-end gap-3">
+                        <button
+                          onClick={() => runAudit(s.id, s.name)}
+                          disabled={busyAudit === s.id}
+                          className="font-medium text-brand hover:underline disabled:opacity-50"
+                        >
+                          {busyAudit === s.id ? "Queuing…" : "Audit"}
+                        </button>
+                        <Link
+                          href={`/sites/${s.id}`}
+                          className="text-slate-600 hover:underline"
+                        >
+                          View
+                        </Link>
+                        <button
+                          onClick={() => openEdit(s)}
+                          className="text-slate-600 hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => remove(s.id, s.name)}
+                          className="text-critical hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -163,7 +238,7 @@ export default function SitesPage() {
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title="Add New Site"
+        title={mode === "create" ? "Add New Site" : "Edit Site"}
       >
         <Field label="Name">
           <input
@@ -172,11 +247,12 @@ export default function SitesPage() {
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
         </Field>
-        <Field label="Domain">
+        <Field label={mode === "edit" ? "Domain (cannot be changed)" : "Domain"}>
           <input
             className={inputClass}
             placeholder="kedar.estate"
             value={form.domain}
+            disabled={mode === "edit"}
             onChange={(e) => setForm({ ...form, domain: e.target.value })}
           />
         </Field>
@@ -239,7 +315,11 @@ export default function SitesPage() {
             Cancel
           </Button>
           <Button onClick={submit} disabled={saving}>
-            {saving ? "Saving…" : "Create"}
+            {saving
+              ? "Saving…"
+              : mode === "create"
+                ? "Create"
+                : "Save changes"}
           </Button>
         </div>
       </Modal>

@@ -139,9 +139,12 @@ var(s)** and restarting the backend — no code change:
 | Resend (email) | `RESEND_API_KEY` | resend.com |
 | DataForSEO (backlinks) | `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD` | dataforseo.com |
 
-> The real HTTP calls for each integration are stubbed with a clear
-> `NotImplementedError("[PLACEHOLDER] …")` and a commented implementation
-> outline at the call site — wire them in when the keys are provisioned.
+> **Firecrawl** (crawl) and **PageSpeed Insights** (real Core Web Vitals)
+> are real implementations — they make live API calls once enabled. PSI
+> works keyless but is heavily rate-limited (HTTP 429); add a free
+> `PSI_API_KEY` for a real quota. **GSC, Claude and Resend** are still
+> stubs (`NotImplementedError("[PLACEHOLDER] …")`) — wire them in when
+> their keys are provisioned.
 
 The Settings page in the portal lists each integration and the env var to
 set.

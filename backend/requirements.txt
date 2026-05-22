@@ -27,6 +27,7 @@ bcrypt==4.2.1
 
 # ── External integrations (Section 6 — used in mock mode until keys set) ──
 httpx==0.28.1
+beautifulsoup4==4.12.3
 anthropic==0.42.0
 resend==2.6.0
 google-auth==2.37.0
